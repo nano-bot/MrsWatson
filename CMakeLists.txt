@@ -1,22 +1,16 @@
 cmake_minimum_required(VERSION 3.0)
 project(MrsWatson)
 
-set(CMAKE_INCLUDE_CURRENT_DIR TRUE)
-set(cmake_SCRIPTS_DIR ${CMAKE_SOURCE_DIR}/cmake)
-include_directories(${CMAKE_SOURCE_DIR}/source)
-
 #################
 # Build options #
 #################
 
 option(WITH_AUDIOFILE "Use libaudiofile for reading/writing files" ON)
-option(WITH_FLAC "Support for FLAC files (requires libaudiofile)" OFF)
-
-
 if(WITH_AUDIOFILE)
   add_definitions(-DUSE_AUDIOFILE=1)
 endif()
 
+option(WITH_FLAC "Support for FLAC files (requires libaudiofile)" OFF)
 if(WITH_FLAC)
   if(NOT WITH_AUDIOFILE)
     message(FATAL_ERROR "FLAC support requires WITH_AUDIOFILE")
@@ -125,7 +119,7 @@ elseif(UNIX)
   )
 
     # Clang-specific flags
-  if(${CMAKE_CXX_COMPILER_ID} STREQUAL Clang)
+  if(${CMAKE_CXX_COMPILER_ID} MATCHES Clang)
     set(mw_COMMON_FLAGS_LIST
       ${mw_COMMON_FLAGS_LIST}
       "-Wunused-const-variable"
@@ -201,12 +195,23 @@ endif()
 # Subdirectories #
 ##################
 
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+include_directories(${CMAKE_SOURCE_DIR}/source)
+
+set(mw_cmake_scripts_DIR ${PROJECT_SOURCE_DIR}/cmake)
+
 # The vendor subdirectory must be defined first, since it sets some variables
 # that are referenced by CMake scripts in the other directories
 add_subdirectory(vendor)
 add_subdirectory(source)
 add_subdirectory(main)
 add_subdirectory(test)
+
+#############
+# Packaging #
+#############
+
+include(${mw_cmake_scripts_DIR}/BuildPackage.cmake)
 
 #################
 # Build summary #
